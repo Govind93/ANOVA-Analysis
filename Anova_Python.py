@@ -3,41 +3,43 @@
 ## step by step Anova Calculation :
 import numpy as np
 from scipy.stats import f
+import pandas as pd
+# Sample data
+data = pd.read_csv('E:/ANOsampledata.csv')
 
-# Sample data 
-## data = pd.read_csv('data.csv') # instead of Array we can read our CSV file.
-data = np.array([[89,89,88,78,78], [93,92,94,89,88], [89,88,89,93,90], [81,78,81,92,82]])
+overall_mean = data.mean().mean()
+group_means = data.mean(axis=0)
+print(f"group_means: {group_means}")
+print(f"overall_mean: {overall_mean}")
 
-# Step 1: Calculate overall mean
-overall_mean = np.mean(data)
+# Between-Group Sum of Squares
+SSB = np.sum(data.shape[0] * (group_means - overall_mean)**2)
+print(f"Between-Group Sum of Squares (SSB): {SSB}")
 
-# Step 2: Calculate group means
-group_means = np.mean(data, axis=1)
+# Replicate the group means to match the shape of the original DataFrame
+group_means_matrix = np.tile(group_means.values, (data.shape[0], 1))
+#  Within-Group Sum of Squares
+SSW = np.sum((data.values - group_means_matrix)**2)
+print(f"within-Group Sum of Squares (SSW): {SSW}")
 
-# Step 3: Calculate Between-Group Sum of Squares (SSB)
-SSB = np.sum(data.shape[1] * (group_means - overall_mean)**2)
+# Degrees of Freedom
+df_between = data.shape[1] - 1
+df_within = data.size - data.shape[1]
+print(f"degree of freedom (df_between): {df_between}")
+print(f"degree of freedom (df_within): {df_within}")
 
-# Step 4: Calculate Within-Group Sum of Squares (SSW)
-SSW = np.sum((data - group_means[:, np.newaxis])**2)
-
-# Step 5: Calculate Degrees of Freedom
-df_between = data.shape[0] - 1
-df_within = data.size - data.shape[0]
-
-# Step 6: Calculate Mean Squares
+#  Mean Squares
 MSB = SSB / df_between
 MSW = SSW / df_within
 
-# Step 7: Calculate F-statistic
+# F-statistic
 F = MSB / MSW
-
-# Step 8: Compare F-statistic with Critical Value or P-value
+# Compare F-statistic with Critical Value or P-value
 p_value = 1 - f.cdf(F, df_between, df_within)
 
 # Print results
 print(f"F-statistic: {F}")
 print(f"P-value: {p_value}")
-
 
 
 
